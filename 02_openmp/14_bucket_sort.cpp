@@ -1,11 +1,14 @@
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
-
+#include <omp.h>
 int main() {
-  int n = 50;
-  int range = 5;
+//  int n = 50;
+//  int range = 5;
+  int n = 500;
+  int range = 10;
   std::vector<int> key(n);
+#pragma omp parallel for
   for (int i=0; i<n; i++) {
     key[i] = rand() % range;
     printf("%d ",key[i]);
@@ -13,8 +16,11 @@ int main() {
   printf("\n");
 
   std::vector<int> bucket(range,0); 
-  for (int i=0; i<n; i++)
-    bucket[key[i]]++;
+#pragma omp parallel for shared(bucket)
+  for (int i=0; i<n; i++){
+#pragma omp atomic update
+    bucket[key[i]]++;}
+
   std::vector<int> offset(range,0);
   for (int i=1; i<range; i++) 
     offset[i] = offset[i-1] + bucket[i-1];
